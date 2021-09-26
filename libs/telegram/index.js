@@ -15,26 +15,6 @@ const Bot = new Telegram(apiKey, { polling: true });
 
 /**
  * @description example of a text message
- * {
-  message_id: 1,
-  from: {
-    id: 954904207,
-    is_bot: false,
-    first_name: 'SEYIJS',
-    username: 'SEYIJS',
-    language_code: 'en'
-  },
-  chat: {
-    id: 954904207,
-    first_name: 'SEYIJS',
-    username: 'SEYIJS',
-    type: 'private'
-  },
-  date: 1632625102,
-  text: '/start',
-  entities: [ { offset: 0, length: 6, type: 'bot_command' } ]
-}
-
  */
 
 
@@ -128,7 +108,6 @@ const HANDLE_EDIT_MESSAGE = (text,options)=>{
 /**
  * @param {Object} message 
  */
-let media_files=[];
 const HANDLE_URLS = async (message) => {
     const match = HANDLE_VERIFY_URL(message.text);
 
