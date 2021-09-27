@@ -12,6 +12,29 @@ const UserSchema = new mongoose.Schema({
         unique: true,
     },
 
+    twitter_info:{
+        user_id:{
+            type:String,
+
+        },
+        screen_name:{
+            type:String,
+        },
+        otp:{
+            type:Number
+        },
+
+        info_verified:{
+            type:Boolean,
+            default:false
+        },
+        verification_attempt:{
+            type:Number,
+            default:0
+        }
+
+    },
+
     downloaded_media: [
         {
             type: ObjectId,

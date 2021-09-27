@@ -128,6 +128,17 @@ const HANDLE_URLS = async (message) => {
 };
 
 
+exports.HANDLE_SEND_VIDEO = async (chatId,url,options) =>{
+
+    try {
+
+        await Bot.sendVideo(chatId, url, options);
+        
+    } catch (error) {
+        console.log(error)
+    };
+};
+
 
 
 
