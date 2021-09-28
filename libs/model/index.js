@@ -12,6 +12,11 @@ const UserSchema = new mongoose.Schema({
         unique: true,
     },
 
+    isBlocked:{
+        type:Boolean,
+        default:false,
+    },
+
     twitter_info:{
         user_id:{
             type:String,

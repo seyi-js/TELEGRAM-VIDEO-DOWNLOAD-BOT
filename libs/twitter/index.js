@@ -1,7 +1,9 @@
 const Axios = require('axios');
 const Twit = require('twit');
 let config;
-const { HANDLE_WRITE_RESPONSE_TO_FILE } = require('../../misc/index')
+const { HANDLE_WRITE_RESPONSE_TO_FILE } = require('../../misc/index');
+const {screen_name} = require('../../misc/utils');
+const { User } = require('../model');
 if (process.env.NODE_ENV !== 'production') {
     config = require('../config').twitter_envs
 } else {
@@ -16,18 +18,17 @@ if (process.env.NODE_ENV !== 'production') {
 
 const Twitter = new Twit(config);
 
-const screen_name = 'OLU_WASEYI'
 let media_files = [];
 let tweet;
 let message_id;
 
 const randomNegativeResponse = [
-    `oops!! there was a problem processing your request, do check out @${username} pinned post for the correct format of making a call ,  \nDo have a wonderful day🤗`,
+    `oops!! there was a problem processing your request, do check out @${screen_name} pinned post for the correct format of making a call ,  \nDo have a wonderful day🤗`,
     `Error 404!🤗, I could not find your telegram account in my store, do check out @${screen_name} pinned post for the correct format of making a call. \nHope to see you around.`
 ];
 
 
-exports.GET_TWEET_DETAILS = async (message, HANDLE_SEND_MESSAGE, HANDLE_EDIT_MESSAGE, response) => {
+exports.GET_TWEET_DETAILS = async (message, HANDLE_SEND_MESSAGE, HANDLE_EDIT_MESSAGE, response,HANDLE_SEND_VIDEO) => {
 
     try {
 
@@ -39,30 +40,17 @@ exports.GET_TWEET_DETAILS = async (message, HANDLE_SEND_MESSAGE, HANDLE_EDIT_MES
         let buttons = [];
         if (data.extended_entities && data.extended_entities.media[0].type == "video") {
 
-            media_files = data.extended_entities.media[0].video_info.variants.filter(file => file.content_type == "video/mp4");
+        
 
+            const media_files = data.extended_entities.media[0].video_info.variants.filter(file => file.content_type == "video/mp4");
+            const greatest_bitrate = media_files.sort((fileA, fileB) => fileB.bitrate - fileA.bitrate)[0]
 
-            media_files.map(file => {
-                buttons.push([
-                    {
-                        text: `🎞 ${file.url.includes("amplify_video")
-                            ? file.url.split("/")[6]
-                            : file.url.split("/")[7]
-                            }`,
-                        callback_data: file.url.includes("amplify_video")
-                            ? file.url.split("/")[6]
-                            : file.url.split("/")[7]
-                    }
-                ])
-            });
+            const options = {
+                caption: `Hi, here's the video you requested.\n\n - - - \n\n  @DownloadThisVidBot`
+            };
 
-            HANDLE_EDIT_MESSAGE('\n\n\n\⬇️ Choose a quality...', {
-                chat_id: response.chat.id,
-                message_id: response.message_id,
-                reply_markup: {
-                    inline_keyboard: buttons
-                }
-            })
+            await HANDLE_SEND_VIDEO(response.chat.id, greatest_bitrate.url, options);
+           
 
 
 
@@ -86,76 +74,7 @@ exports.GET_TWEET_DETAILS = async (message, HANDLE_SEND_MESSAGE, HANDLE_EDIT_MES
 };
 
 
-/**
- * @description Handling callback after the user chooses the video quality 
- * for a tweet.
- * @param {Object} query 
- * @param {Funtion} Bot 
- * @param {Funtion} HANDLE_SEND_MESSAGE 
- */
-exports.HANDLE_TWEET_CALLBACK = async (query, Bot, HANDLE_SEND_MESSAGE) => {
-    const data = query.data;
-    const chatId = query.message.chat.id;
-    const qmsgId = query.message.message_id;
-    let quality_button = [];
-    let button_icon;
-    try {
 
-        const quality = media_files.filter(file => file.url.includes(data));
-
-        if (quality.length) {
-
-            media_files.map(file => {
-                if (file.url.includes('apmplify_video') && file.url.split('/')[6] == data || file.url.split("/")[7] == data) {
-
-                    button_icon = "✅";
-
-                } else {
-                    button_icon = "🎞";
-                };
-
-                quality_button.push([
-                    {
-                        text: `${button_icon} Quality ${file.url.includes("amplify_video")
-                            ? file.url.split("/")[6]
-                            : file.url.split("/")[7]
-                            }`,
-                        callback_data: file.url.includes("amplify_video")
-                            ? file.url.split("/")[6]
-                            : file.url.split("/")[7]
-                    }
-                ]);
-            });
-
-
-            const options = {
-                caption: `\n\n - - - \n\n  @DownloadThisVidBot`,
-                reply_to_message_id: message_id,
-                reply_markup: {
-                    inline_keyboard: quality_button
-                }
-            };
-
-
-
-            await Bot.sendVideo(chatId, quality[0].url, options)
-            await Bot.deleteMessage(chatId, qmsgId)
-        } else {
-            await Bot.deleteMessage(chatId, qmsgId)
-        }
-
-    } catch (error) {
-
-        HANDLE_SEND_MESSAGE(chatId, '⚠️ Sorry, The quality of this video is not available now, please choose another quality.', {
-            reply_to_message_id: message_id,
-            reply_markup: {
-                inline_keyboard: quality_button
-            }
-        })
-        console.log(error)
-    }
-
-};
 
 const refrenced_tweet_ids = [];
 let mentions = [];
@@ -298,16 +217,28 @@ const HANDLE_EXTRACT_VIDEO_FROM_TWEET = async (tweets, HANDLE_SEND_VIDEO) => {
                 const greatest_bitrate = media_files.sort((fileA, fileB) => fileB.bitrate - fileA.bitrate)[0]
 
                 const options = {
-                    caption: `Hi, here's the video you requested.\n\n - - - \n\n  @DownloadThisVidBot`
+                    caption: `Hi @${the_mention.user.screen_name}, here's the video you requested from Twitter.\n\n - - - \n\n  @DownloadThisVidBot`
                 };
+                //Check if the user is in the DB
+                const user = await User.findOne({'twitter_info.user_id':the_mention.user.id_str});
 
-                let chatId;//Get user info from DB.
-                await HANDLE_SEND_VIDEO(chatId, greatest_bitrate.url, options)
+                if(user && user.twitter_info.info_verified){
 
+                    let chatId = user.telegram_user_id;//Get user info from DB.
+                await HANDLE_SEND_VIDEO(chatId, greatest_bitrate.url, options);
 
-                HANDLE_WRITE_RESPONSE_TO_FILE('misc/examples/vids_tweet.js', data)
+                  return await  HANDLE_REPLY_A_TWEET(the_mention.id_str,`Hello @${the_mention.user.screen_name},\nThis Video has been sent to your telegram account.`)
+    
+    
+                };
+                if(user && !user.twitter_info.info_verified){
 
-            })
+                }
+
+                console.log('User Not Found for this tweet',the_mention.user)
+                
+
+            });
         };
 
 
@@ -329,7 +260,7 @@ const HANDLE_EXTRACT_VIDEO_FROM_TWEET = async (tweets, HANDLE_SEND_VIDEO) => {
  * @param {String} user_id 
  * @param {String} message 
  */
-const HANDLE_SEND_DIRECT_MESSAGE = async (user_id, message) => {
+exports.HANDLE_SEND_DIRECT_MESSAGE = async (user_id, message) => {
     try {
 
         const options = {
@@ -344,8 +275,8 @@ const HANDLE_SEND_DIRECT_MESSAGE = async (user_id, message) => {
                     }
                 }
             }
-        }
-        const response = await Twitter.post('direct_messages/events/new', options);
+        };
+        await Twitter.post('direct_messages/events/new', options);
 
         // console.log(response)
     } catch (error) {
@@ -358,7 +289,7 @@ const HANDLE_SEND_DIRECT_MESSAGE = async (user_id, message) => {
  * @param {String} screen_name 
  * @returns {Object} user
  */
-const LOOK_UP_USER_BY_SCREEN_NAME = async (screen_name) => {
+exports.LOOK_UP_USER_BY_SCREEN_NAME = async (screen_name) => {
     try {
         const { data } = await Twitter.get('users/lookup', { screen_name });
         if (data.length !== 0) {
