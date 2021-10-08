@@ -46,7 +46,7 @@ exports.GET_TWEET_DETAILS = async (message, HANDLE_SEND_MESSAGE, HANDLE_EDIT_MES
             const greatest_bitrate = media_files.sort((fileA, fileB) => fileB.bitrate - fileA.bitrate)[0]
 
             const options = {
-                caption: `Hi, here's the video you requested.\n\n - - - \n\n  @DownloadThisVidBot`
+                caption: `Hi, here's the video you requested.\n\n - - - \n\n  @${screen_name}`
             };
 
             await HANDLE_SEND_VIDEO(response.chat.id, greatest_bitrate.url, options);
@@ -76,10 +76,12 @@ exports.GET_TWEET_DETAILS = async (message, HANDLE_SEND_MESSAGE, HANDLE_EDIT_MES
 
 
 
-const refrenced_tweet_ids = [];
-let mentions = [];
+
+
 
 exports.HANDLE_GET_BOT_MENTIONS = async (last_tweet_id, HANDLE_SEND_VIDEO) => {
+    const refrenced_tweet_ids = [];
+    let mentions = [];
     try {
         const options = { count: 50 };
 
@@ -100,9 +102,11 @@ exports.HANDLE_GET_BOT_MENTIONS = async (last_tweet_id, HANDLE_SEND_VIDEO) => {
 
             const HaveIReplied = BotTimeline.find(t => t.in_reply_to_status_id_str === tweet.id_str);
 
-
+            
 
             if (isTweetAMention && !HaveIReplied) {
+
+                // console.log(tweet)
 
                 refrenced_tweet_ids.push(tweet.in_reply_to_status_id_str);
 
@@ -117,7 +121,7 @@ exports.HANDLE_GET_BOT_MENTIONS = async (last_tweet_id, HANDLE_SEND_VIDEO) => {
         // console.log(refrenced_tweet_ids)
         const refrenced_tweets = await HANDLE_GET_REFERENCED_TWEET(refrenced_tweet_ids)
         //Work on the tweet
-        HANDLE_EXTRACT_VIDEO_FROM_TWEET(refrenced_tweets, HANDLE_SEND_VIDEO)
+        HANDLE_EXTRACT_VIDEO_FROM_TWEET(refrenced_tweets, HANDLE_SEND_VIDEO,mentions)
         // HANDLE_WRITE_RESPONSE_TO_FILE('misc/examples/valid_metions.js', tweet);
     } catch (error) {
         console.log(error);
@@ -197,13 +201,14 @@ const HANDLE_GET_REFERENCED_TWEET = async (tweet_ids) => {
  * @param {Array} tweets 
  * @param {Function} HANDLE_SEND_VIDEO 
  */
-const HANDLE_EXTRACT_VIDEO_FROM_TWEET = async (tweets, HANDLE_SEND_VIDEO) => {
+const HANDLE_EXTRACT_VIDEO_FROM_TWEET = async (tweets, HANDLE_SEND_VIDEO,mentions) => {
     try {
 
         let buttons = [];
 
         const tweets_with_vid = tweets.filter(tweet => tweet.extended_entities && tweet.extended_entities.media[0].type == "video");
 
+       
         if (tweets_with_vid.length !== 0) {
             tweets_with_vid.forEach(async referenced_tweet => {
                 const the_mention = mentions.find(mention => mention.in_reply_to_status_id_str === referenced_tweet.id_str);
@@ -212,17 +217,26 @@ const HANDLE_EXTRACT_VIDEO_FROM_TWEET = async (tweets, HANDLE_SEND_VIDEO) => {
                     the_mention
                 };
 
+                
+
+                
+
                 const media_files = referenced_tweet.extended_entities.media[0].video_info.variants.filter(file => file.content_type == "video/mp4");
                 // const sorted = files.sort((a,b)=> b.bitrate - a.bitrate)
                 const greatest_bitrate = media_files.sort((fileA, fileB) => fileB.bitrate - fileA.bitrate)[0]
 
                 const options = {
-                    caption: `Hi @${the_mention.user.screen_name}, here's the video you requested from Twitter.\n\n - - - \n\n  @DownloadThisVidBot`
+                    caption: `Hi @${the_mention.user.screen_name}, here's the video you requested from Twitter.\n\n - - - \n\n  @${screen_name}`
                 };
                 //Check if the user is in the DB
                 const user = await User.findOne({'twitter_info.user_id':the_mention.user.id_str});
 
+                // console.log(user)
                 if(user && user.twitter_info.info_verified){
+
+
+                    // console.log(the_mention.id_str)
+                    // return 
 
                     let chatId = user.telegram_user_id;//Get user info from DB.
                 await HANDLE_SEND_VIDEO(chatId, greatest_bitrate.url, options);
