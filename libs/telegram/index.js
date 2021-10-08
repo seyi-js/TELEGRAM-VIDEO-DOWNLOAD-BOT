@@ -239,7 +239,7 @@ module.exports = () => {
 
                     opt_user.twitter_info.verification_attempt = 0;
                     opt_user.twitter_info.info_verified = true;
-                    opt_user.twitter_info.otp = null;
+                    opt_user.twitter_info.otp = 0;
                     await opt_user.save();
 
                     return HANDLE_SEND_MESSAGE(message.chat.id, `Hurray!!!, your twitter account has been linked successfully. You can now mention me under any tweet containing a video and I will send it right into your telegram inbox.`, { reply_to_message_id: message.message_id });
