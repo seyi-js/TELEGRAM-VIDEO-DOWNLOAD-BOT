@@ -2,7 +2,7 @@
 require('dotenv').config();
 
 const { CONNECT_TO_DATABASE } = require('./libs/config/DBconfig');
-// const Telegram = require('./libs/telegram');
+const Telegram = require('./libs/telegram');
 const { HANDLE_GET_BOT_MENTIONS } = require('./libs/twitter')
 
 
