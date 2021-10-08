@@ -246,7 +246,7 @@ const HANDLE_EXTRACT_VIDEO_FROM_TWEET = async (tweets, HANDLE_SEND_VIDEO,mention
     
                 };
                 if(user && !user.twitter_info.info_verified){
-
+                    HANDLE_REPLY_A_TWEET(the_mention.id_str,`Hello @${the_mention.user.screen_name},\nKindly verify your account.`);
                 }
 
                 if(!user){
