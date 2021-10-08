@@ -249,6 +249,10 @@ const HANDLE_EXTRACT_VIDEO_FROM_TWEET = async (tweets, HANDLE_SEND_VIDEO,mention
 
                 }
 
+                if(!user){
+                    HANDLE_REPLY_A_TWEET(the_mention.id_str,`Hello @${the_mention.user.screen_name},\nIt looks like you haven't linked your telegram account with your twitter account, kindly click on the link in my bio to get started.`);
+                };
+
                 // console.log('User Not Found for this tweet',the_mention.user)
                 
 
