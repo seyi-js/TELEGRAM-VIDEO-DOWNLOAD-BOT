@@ -1,4 +1,4 @@
 module.exports={
-    screen_name:'OLU_WASEYI',
+    screen_name:'sendMeThisVid',
     VERIFICATION_ATTEMPT:10
 };
