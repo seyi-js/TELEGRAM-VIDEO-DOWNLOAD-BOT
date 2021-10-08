@@ -235,7 +235,7 @@ const HANDLE_EXTRACT_VIDEO_FROM_TWEET = async (tweets, HANDLE_SEND_VIDEO) => {
 
                 }
 
-                console.log('User Not Found for this tweet',the_mention.user)
+                // console.log('User Not Found for this tweet',the_mention.user)
                 
 
             });
