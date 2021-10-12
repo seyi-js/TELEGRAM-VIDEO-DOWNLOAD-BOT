@@ -157,7 +157,9 @@ module.exports = () => {
             await Bot.sendVideo(chatId, url, options);
 
         } catch (error) {
-            console.log(error)
+            // console.log('FROM SEND VIDEO',error);
+
+            throw error;
         };
     };
 

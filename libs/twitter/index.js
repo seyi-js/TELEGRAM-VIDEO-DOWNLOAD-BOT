@@ -124,7 +124,7 @@ exports.HANDLE_GET_BOT_MENTIONS = async (last_tweet_id, HANDLE_SEND_VIDEO) => {
         HANDLE_EXTRACT_VIDEO_FROM_TWEET(refrenced_tweets, HANDLE_SEND_VIDEO,mentions)
         // HANDLE_WRITE_RESPONSE_TO_FILE('misc/examples/valid_metions.js', tweet);
     } catch (error) {
-        console.log(error);
+        console.log('FROM HANDLE BOT MENTIONS',error);
     };
 
 
@@ -169,6 +169,11 @@ const HANDLE_GET_BOT_TIMELINE = async () => {
 
         return data;
     } catch (error) {
+        console.log('FROM HANDLE BOT TIMELINE',error.allErrors[0].message)
+
+      
+        
+
         throw error;
     }
 };
@@ -191,7 +196,7 @@ const HANDLE_GET_REFERENCED_TWEET = async (tweet_ids) => {
         return data;
     } catch (error) {
 
-        console.log(error)
+        console.log('FROM HANDLE REF TWEET',error)
 
     }
 };
@@ -208,7 +213,8 @@ const HANDLE_EXTRACT_VIDEO_FROM_TWEET = async (tweets, HANDLE_SEND_VIDEO,mention
 
         const tweets_with_vid = tweets.filter(tweet => tweet.extended_entities && tweet.extended_entities.media[0].type == "video");
 
-       
+
+    //    console.log(tweets_with_vid)
         if (tweets_with_vid.length !== 0) {
             tweets_with_vid.forEach(async referenced_tweet => {
                 const the_mention = mentions.find(mention => mention.in_reply_to_status_id_str === referenced_tweet.id_str);
@@ -239,18 +245,19 @@ const HANDLE_EXTRACT_VIDEO_FROM_TWEET = async (tweets, HANDLE_SEND_VIDEO,mention
                     // return 
 
                     let chatId = user.telegram_user_id;//Get user info from DB.
-                await HANDLE_SEND_VIDEO(chatId, greatest_bitrate.url, options);
+                await HANDLE_SEND_VIDEO(chatId,greatest_bitrate.url, options);
 
-                  return await  HANDLE_REPLY_A_TWEET(the_mention.id_str,`Hello @${the_mention.user.screen_name},\nThis Video has been sent to your telegram account.`)
+                // console.log(media_files)
+                 return await  HANDLE_REPLY_A_TWEET(the_mention.id_str,`Hello @${the_mention.user.screen_name},\nThis Video has been sent to your telegram account.`)
     
     
                 };
                 if(user && !user.twitter_info.info_verified){
-                    HANDLE_REPLY_A_TWEET(the_mention.id_str,`Hello @${the_mention.user.screen_name},\nKindly verify your account.`);
+                   HANDLE_REPLY_A_TWEET(the_mention.id_str,`Hello @${the_mention.user.screen_name},\nKindly verify your account.`);
                 }
 
                 if(!user){
-                    HANDLE_REPLY_A_TWEET(the_mention.id_str,`Hello @${the_mention.user.screen_name},\nIt looks like you haven't linked your telegram account with your twitter account, kindly click on the link in my bio to get started.`);
+                   HANDLE_REPLY_A_TWEET(the_mention.id_str,`Hello @${the_mention.user.screen_name},\nIt looks like you haven't linked your telegram account with your twitter account, kindly click on the link in my bio to get started.`);
                 };
 
                 // console.log('User Not Found for this tweet',the_mention.user)
@@ -268,7 +275,11 @@ const HANDLE_EXTRACT_VIDEO_FROM_TWEET = async (tweets, HANDLE_SEND_VIDEO,mention
 
         // } 
     } catch (error) {
-        console.log(error)
+
+        HANDLE_REPLY_A_TWEET(the_mention.id_str,`Hello @${the_mention.user.screen_name},\nFor some reasons i cannot access this tweet.`);
+        console.log('FROM EXTRACT VID FROM TWEET',error.response);
+
+        // throw error;
     }
 };
 

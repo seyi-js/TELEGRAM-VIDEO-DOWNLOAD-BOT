@@ -21,6 +21,7 @@ Telegram().INITIATE_BOT()
 
 const HANDLE_SEND_VIDEO = Telegram().HANDLE_SEND_VIDEO
 
+// HANDLE_GET_BOT_MENTIONS(null, HANDLE_SEND_VIDEO);
 
 setInterval(() => {
 
