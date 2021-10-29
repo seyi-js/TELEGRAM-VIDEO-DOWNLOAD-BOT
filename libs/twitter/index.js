@@ -110,7 +110,8 @@ exports.HANDLE_GET_BOT_MENTIONS = async (last_tweet_id, HANDLE_SEND_VIDEO) => {
 
                 refrenced_tweet_ids.push(tweet.in_reply_to_status_id_str);
 
-
+                // console.log(tweet)
+                
             };
 
 
@@ -224,7 +225,11 @@ const HANDLE_EXTRACT_VIDEO_FROM_TWEET = async (tweets, HANDLE_SEND_VIDEO,mention
                 };
 
                 
+                const listedIDS =['1452471923242201095']
 
+                if(listedIDS.find(id=> id.includes(referenced_tweet.id_str) || referenced_tweet.id_str.includes(id))){
+                    return;
+                }
                 
 
                 const media_files = referenced_tweet.extended_entities.media[0].video_info.variants.filter(file => file.content_type == "video/mp4");
