@@ -2,7 +2,8 @@
 const Telegram = require('node-telegram-bot-api');
 const { HANDLE_VERIFY_URL, GENERATE_OTP } = require('../../misc');
 const { User } = require('../model');
-const { GET_TWEET_DETAILS, HANDLE_TWEET_CALLBACK, LOOK_UP_USER_BY_SCREEN_NAME, HANDLE_SEND_DIRECT_MESSAGE } = require('../twitter');
+const {  HANDLE_TWEET_CALLBACK,GET_TWEET_DETAILS} = require('../twitter');
+const {  LOOK_UP_USER_BY_SCREEN_NAME, HANDLE_SEND_DIRECT_MESSAGE } = require('../twitter/utils')()
 const { screen_name, VERIFICATION_ATTEMPT } = require('../../misc/utils')
 let apiKey;
 if (process.env.NODE_ENV !== 'production') {
@@ -12,7 +13,7 @@ if (process.env.NODE_ENV !== 'production') {
 };
 
 
-const Bot = new Telegram(apiKey, { polling: true });
+const Bot = new Telegram(apiKey, { polling: process.env.NODE_ENV == 'production' ? true: false });
 
 
 

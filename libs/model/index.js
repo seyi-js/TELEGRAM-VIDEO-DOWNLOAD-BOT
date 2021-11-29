@@ -1,5 +1,6 @@
 const mongoose = require('mongoose');
 const ObjectId = mongoose.Schema.Types.ObjectId;
+
 const UserSchema = new mongoose.Schema({
     telegram_username: {
         type: String,
@@ -40,16 +41,14 @@ const UserSchema = new mongoose.Schema({
 
     },
 
-    downloaded_media: [
-        {
-            type: ObjectId,
-            ref: 'medias',
-        }
-    ]
+    
 },{timestamps:true});
 
 
 const MediaSchema = new mongoose.Schema({
+    tweet_id:{
+        type:String
+    },
     main_url:{
         type:String,
         unique:true,
@@ -59,12 +58,30 @@ const MediaSchema = new mongoose.Schema({
         type:String,
         required:true
     },
+
     source:{
         type:String,
         required:true
     }
 },{timestamps:true});
 
+const TwitterSchema= new mongoose.Schema({
+    user_id:{
+        type:String,
+        unique:true
+    },
+    screen_name:{
+        type:String,
+        unique:true
+    },
+    downloaded_media: [
+        {
+            type: ObjectId,
+            ref: 'medias',
+        }
+    ]
+})
 
 exports.User = mongoose.model('users', UserSchema);
 exports.Media = mongoose.model('medias',MediaSchema);
+exports.TwitterUser = mongoose.model('twitterusers',TwitterSchema);
