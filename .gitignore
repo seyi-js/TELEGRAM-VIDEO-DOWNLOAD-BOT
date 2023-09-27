@@ -1,2 +1,3 @@
 /node_modules
 /libs/config/index.js
+.env
